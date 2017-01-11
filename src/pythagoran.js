@@ -1,9 +1,6 @@
 import { patch } from 'incremental-dom';
-import { compile } from './pug-inc';
+import { elementOpen, elementClose, elementVoid } from './pug-inc';
 import { interpolateViridis } from 'd3-scale';
-
-import appTpl from './pythagoran.tpl.pug';
-const renderAppDom = compile(appTpl);
 
 const piConst = Math.PI / 180;
 const toDeg = (val) => val / piConst;
@@ -37,7 +34,7 @@ const memoizedCalc = function () {
 	}
 }();
 
-export const Pythagoras = (parent, { w,x, y, heightFactor, lean, left, right, lvl, maxlvl }) => {
+export const Pythagoras = ({ w,x, y, heightFactor, lean, left, right, lvl, maxlvl }) => {
 	if (lvl >= maxlvl || w < 1) {
 		return null;
 	}
@@ -56,14 +53,6 @@ export const Pythagoras = (parent, { w,x, y, heightFactor, lean, left, right, lv
 		rotate = `rotate(${B} ${w} ${w})`;
 	}
 	
-	const transform = `translate(${x} ${y}) ${rotate}`;
-	const rectProps = {
-		width: w,
-		height: w,
-		style: `fill: ${interpolateViridis(lvl/maxlvl)}`,
-		x: 0,
-		y: 0,
-	};
 
 	const nextLeftProps = {
 		w: nextLeft,
@@ -87,11 +76,22 @@ export const Pythagoras = (parent, { w,x, y, heightFactor, lean, left, right, lv
 		right: true
 	};
 
-	const props = {
-		transform, rectProps
-	};
+	const gProps = [
+		'transform', `translate(${x} ${y}) ${rotate}` 
+	];
 
-	patch(parent, renderAppDom, props);
-	Pythagoras(parent.children[0].children[1], nextLeftProps);
-	Pythagoras(parent.children[0].children[2], nextRightProps);
+	const rectProps = [
+		'x', 0,
+		'y', 0,
+		'width', w,
+		'height', w,
+		'style', `fill: ${interpolateViridis(lvl/maxlvl)}`
+	];
+
+	// patch(parent, renderAppDom, props);
+	elementOpen('g', undefined, [], gProps);
+		elementVoid('rect', undefined, [], rectProps);
+		Pythagoras(nextLeftProps);
+		Pythagoras(nextRightProps);
+	elementClose('g', undefined);
 };

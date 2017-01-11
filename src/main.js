@@ -1,5 +1,4 @@
 import './main.scss';
-import { select, mouse } from 'd3-selection';
 import { scaleLinear } from 'd3-scale';
 
 import { patch } from 'incremental-dom';
@@ -64,6 +63,10 @@ const update = (evt) => {
 		maxlvl: 11,
 	};
 	
-	Pythagoras(svgNode, baseTreeProps);
+	patch(
+		svgNode,
+		() => Pythagoras(baseTreeProps),
+		{}
+	);
 };
 svgNode.addEventListener('mousemove', throttleWithRAF(update));
