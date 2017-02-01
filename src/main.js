@@ -1,72 +1,54 @@
 import './main.scss';
-import { scaleLinear } from 'd3-scale';
 
 import { patch } from 'incremental-dom';
 import { compile } from './pug-inc';
-import { Pythagoras } from './pythagoran';
 
-import appTpl from './app.tpl.pug';
+import todoTpl from './todo.tpl.pug';
 
-const renderAppDom = compile(appTpl);
+const todoPatch = compile(todoTpl);
 
-// Update my-app with mouse stuff
-function throttleWithRAF (fn) {
-  let running = false
-  return function () {
-    if (running) return
-    running = true
-    window.requestAnimationFrame(() => {
-      fn.apply(this, arguments)
-      running = false
-    })
-  }
+const defaultState = {
+	items: [],
+};
+
+class PugTodoDemo extends HTMLElement {
+	constructor() {
+		super();
+		
+		this._shadow = this.attachShadow({ mode: 'open' });
+		this.props = {
+			...defaultState,
+			editItem: (evt) => {
+				console.debug('Double click!', evt)
+			},
+			inputEventHandler: (evt) => {
+				if (evt.code === 'Enter') {
+					this.props = {
+						...this.props,
+						items: this.props.items.concat(evt.target.value)
+					};
+					
+					evt.target.value = '';
+					
+					this.render(this.props);
+				}
+			}
+		};
+
+		this.render(this.props);
+	}
+
+	render(props = {}) {
+		patch(this._shadow, todoPatch, props);
+	}
+	
+	attributeChangedCallback(attr, oldVal, newVal) {
+		this.render(this.props);
+	}
+	
+	static get observedAttributes() {
+		return ['data-items'];
+	}
 }
 
-const appNode = document.querySelector('.my-app');
-const svgNode = appNode.querySelector('svg');
-
-const svgSize = {
-	width: 1280,
-	height: 600,
-};
-svgNode.setAttribute('width', svgSize.width);
-svgNode.setAttribute('height', svgSize.height);
-
-const scaleFactor = scaleLinear()
-	.domain([svgSize.height, 0])
-	.range([0, 0.8]);
-
-const scaleLean = scaleLinear()
-	.domain([0, svgSize.width / 2, svgSize.width])
-	.range([.5, 0, -.5]);
-
-const update = (evt) => {
-	const x = evt.clientX;
-	const y = evt.clientY;
-
-	const state = {
-		currentMax: 0,
-		baseW: 80,
-		heightFactor: scaleFactor(y),
-		lean: scaleLean(x),
-	};
-
-	// Calc tree props
-	const baseTreeProps = {
-		w: state.baseW,
-		h: state.baseW,
-		heightFactor: state.heightFactor,
-		lean: state.lean,
-		x: svgSize.width / 2 - 40,
-		y: svgSize.height - state.baseW,
-		lvl: 0,
-		maxlvl: 11,
-	};
-	
-	patch(
-		svgNode,
-		() => Pythagoras(baseTreeProps),
-		{}
-	);
-};
-svgNode.addEventListener('mousemove', throttleWithRAF(update));
+customElements.define('pug-todo-demo', PugTodoDemo);

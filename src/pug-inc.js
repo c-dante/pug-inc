@@ -33,6 +33,7 @@ const PugNodeType = {
 	Text: 'Text',
 	Code: 'Code',
 	Each: 'Each',
+	Conditional: 'Conditional',
 };
 
 
@@ -65,6 +66,10 @@ const attrToValue = ({ val }, props) => {
 	return val;
 };
 
+const isEventAttr = (attr) => {
+	return attr.startsWith('on');
+};
+
 /**
  * Parses an attribute list and produces pairs of args to bind
  * onto the incremental-dom element open calls
@@ -84,7 +89,7 @@ const parseAttrs = (attrs, props) => {
 	} = R.reduce(
 		(acc, x) => {
 			const token = x.name.toLowerCase();
-			if (token.startsWith('on')) {
+			if (isEventAttr(token)) {
 				acc.events.push(x);
 			} else if (token === 'class') {
 				acc.classes.push(x);
@@ -183,6 +188,14 @@ export const astToRenderer = (ast) => {
 				}
 			}
 				break;
+				
+			case PugNodeType.Conditional: {
+				// @todo: exec? compile? allow it or just paths?
+				const internalCompiled = astToRenderer(node.consequent);
+				const getPropFn = R.path(node.test.split('.'));
+				commands.push((props) => getPropFn(props) ? internalCompiled(props) : 0);
+				break;
+			}
 
 			case PugNodeType.Text:
 				commands.push(() => text(node.val));
@@ -205,7 +218,7 @@ export const astToRenderer = (ast) => {
 
 			case PugNodeType.Each: {
 				// @todo: sub-compile
-				const internalCompiled = astToRenderer(toAst(node.block));
+				const internalCompiled = astToRenderer(node.block);
 				const itereePath = node.obj.split('.');
 				const itereeKey = node.key || '__key__';
 				const itereeVal = node.val || '__val__';

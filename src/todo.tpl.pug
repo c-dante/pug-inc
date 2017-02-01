@@ -1,0 +1,20 @@
+h1 pug-inc todo
+
+p A todo list backed by my own pug => incremental dom renderer.
+
+input(
+	placeholder="What needs to be done?"
+	onkeypress=inputEventHandler
+)
+
+ul
+	each item, idx in items
+		li(ondblclick=editItem) #{item}
+		if editing
+			input(onkeypress=submitItemEdit, value=item)
+	if items.length
+		.items-left #{items.length} item left
+		.filters
+			button All
+			button Active
+			button Completed
