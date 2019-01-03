@@ -1,6 +1,16 @@
 {
+	"presets": [
+		[
+			"@babel/preset-env",
+			{
+				"modules": false,
+				"useBuiltIns": "usage",
+			}
+		]
+	],
 	"plugins": [
-		"transform-object-rest-spread",
-		"transform-es2015-modules-commonjs",
-	]
+		"@babel/plugin-syntax-object-rest-spread",
+		"@babel/plugin-proposal-class-properties"
+	],
 }
+

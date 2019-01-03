@@ -1,4 +1,4 @@
-import './main.scss';
+import './index.css';
 
 import { patch } from 'incremental-dom';
 import { compile } from './pug-inc';
@@ -14,7 +14,8 @@ const defaultState = {
 class PugTodoDemo extends HTMLElement {
 	constructor() {
 		super();
-		
+		console.debug(this);
+
 		this._shadow = this.attachShadow({ mode: 'open' });
 		this.props = {
 			...defaultState,
@@ -27,9 +28,9 @@ class PugTodoDemo extends HTMLElement {
 						...this.props,
 						items: this.props.items.concat(evt.target.value)
 					};
-					
+
 					evt.target.value = '';
-					
+
 					this.render(this.props);
 				}
 			}
@@ -41,14 +42,15 @@ class PugTodoDemo extends HTMLElement {
 	render(props = {}) {
 		patch(this._shadow, todoPatch, props);
 	}
-	
+
 	attributeChangedCallback(attr, oldVal, newVal) {
 		this.render(this.props);
 	}
-	
+
 	static get observedAttributes() {
 		return ['data-items'];
 	}
 }
 
 customElements.define('pug-todo-demo', PugTodoDemo);
+
