@@ -12,3 +12,4 @@ I'm NOT a fan of giving devs full-on-js freedom in their templates. Why? Because
 Pug is a really nice, succinct langauge to build nested DOM elements.
 
 Mostly a thought project. Maybe it will take shape. Maybe it won't. Who knows?
+

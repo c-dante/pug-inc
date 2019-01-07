@@ -17,3 +17,5 @@ node_modules
 # Misc
 data/
 
+# Optional REPL history
+.node_repl_history
